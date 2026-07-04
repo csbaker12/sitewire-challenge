@@ -26,4 +26,8 @@ export interface UserSummary {
   loginStatus: LoginStatus;
 }
 
-export type LoginStatus = "pending" | "loaded" | "failed";
+export enum LoginStatus {
+  Pending = "pending",
+  Loaded = "loaded",
+  Failed = "failed",
+}

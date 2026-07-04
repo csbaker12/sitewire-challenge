@@ -2,7 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import { DateTime } from "luxon";
 
 import { getUserLogins, getUsers } from "./api/users";
-import type { UserSummary, User } from "./types";
+import {
+  type UserSummary,
+  type User,
+  LoginStatus,
+  type UserLogin,
+} from "./types";
 
 const PAGE_SIZE = 20;
 
@@ -35,20 +40,20 @@ function App() {
                     ? login
                     : latest;
                 },
-                undefined as (typeof data.logins)[number] | undefined,
+                undefined as UserLogin | undefined,
               );
 
-              const lastLogin = latest
+              const lastLogin: DateTime | undefined = latest
                 ? DateTime.fromISO(latest.login_time)
                 : undefined;
 
               return {
                 id: user.id,
-                loginStatus: "loaded" as const,
+                loginStatus: LoginStatus.Loaded,
                 lastLoginTime: lastLogin,
                 lastLoginIp: latest?.ip_v4,
                 inactive:
-                  lastLogin != null &&
+                  !!lastLogin &&
                   lastLogin < DateTime.now().minus({ months: 1 }),
               };
             } catch (error) {
@@ -56,7 +61,7 @@ function App() {
 
               return {
                 id: user.id,
-                loginStatus: "failed" as const,
+                loginStatus: LoginStatus.Failed,
               };
             }
           }),
@@ -98,7 +103,7 @@ function App() {
         lastLoginTime: undefined,
         lastLoginIp: undefined,
         inactive: false,
-        loginStatus: "pending",
+        loginStatus: LoginStatus.Pending,
       }));
 
       setUsers(summaries);
@@ -126,7 +131,11 @@ function App() {
     <>
       <h1>Sitewire Coding Challenge</h1>
 
-      <button onClick={() => loadUsers().catch(console.error)} disabled={loadingUsers || loadingLogins}>Reload</button>
+      <button
+        onClick={() => loadUsers().catch(console.error)}
+        disabled={loadingUsers || loadingLogins}>
+        Reload
+      </button>
 
       {loadingUsers && <p>Loading users...</p>}
 
@@ -137,11 +146,13 @@ function App() {
           {user.email}
           <br />
 
-          {user.loginStatus === "pending" && <>Loading login...</>}
+          {user.loginStatus === LoginStatus.Pending && <>Loading login...</>}
 
-          {user.loginStatus === "failed" && <>Unable to load login.</>}
+          {user.loginStatus === LoginStatus.Failed && (
+            <>Unable to load login.</>
+          )}
 
-          {user.loginStatus === "loaded" && (
+          {user.loginStatus === LoginStatus.Loaded && (
             <>
               {user.lastLoginTime?.toRelative() ?? "Never"}
               {" • "}
