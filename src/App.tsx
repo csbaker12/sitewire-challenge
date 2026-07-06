@@ -92,6 +92,7 @@ function App() {
 
   const loadUsers = useCallback(async () => {
     setLoadingUsers(true);
+    setVisibleCount(PAGE_SIZE);
 
     try {
       const data = await getUsers();
@@ -130,7 +131,7 @@ function App() {
   return (
     <>
       <h1>Sitewire Coding Challenge</h1>
-
+      <h3>Total Users: {loadingUsers ? "Loading..." : users.length}</h3>
       <button
         onClick={() => loadUsers().catch(console.error)}
         disabled={loadingUsers || loadingLogins}>

@@ -13,7 +13,7 @@ export async function fetchWithRetry<T>(url: string, retries = 3): Promise<T> {
         );
       }
 
-      return (await response.json()) as T;
+      return await response.json();
     } catch (error) {
       lastError = error;
 
